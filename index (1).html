@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plataforma Académica – IED Las Montañas del Pando</title>
+<style>
+:root{--b:#1e40af;--g:#2f7d4f;--bg:#f2f5fa;--c:#fff;--t:#1a2233;--l:#d3dae6;--mu:#667;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151f;--c:#1a2232;--t:#e8edf7;--l:#33405a;--mu:#9aa6bd;--b:#5b82ff}}
+:root[data-theme="dark"]{--bg:#10151f;--c:#1a2232;--t:#e8edf7;--l:#33405a;--mu:#9aa6bd;--b:#5b82ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px system-ui,Arial,sans-serif}
+.top{display:flex;align-items:center;gap:10px;background:var(--b);color:#fff;padding:10px 12px}
+.top img{height:42px}.top div{flex:1}.top b{display:block}.top small{opacity:.9;font-size:11px}
+.top button{background:#fff;color:var(--b)}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px;background:var(--c);border-bottom:3px solid var(--g)}
+nav button{white-space:nowrap;background:var(--bg);color:var(--t);border:1px solid var(--l)}
+nav button.on{background:var(--g);color:#fff;border-color:var(--g)}
+main{padding:12px;max-width:1000px;margin:auto}
+button{border:0;border-radius:8px;padding:9px 12px;font:inherit;cursor:pointer;background:var(--l);color:var(--t)}
+button.pri{background:var(--b);color:#fff}button.del{background:#c62828;color:#fff}
+input,select,textarea{font:inherit;padding:8px;border:1px solid var(--l);border-radius:8px;background:var(--c);color:var(--t);max-width:100%}
+.f{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.f input,.f select{flex:1 1 140px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.card{background:var(--c);border:1px solid var(--l);border-left:4px solid var(--g);border-radius:10px;padding:10px}
+.card small{color:var(--mu);display:block}.card b{font-size:22px;color:var(--b)}
+.box{background:var(--c);border:1px solid var(--l);border-radius:10px;padding:10px;margin:10px 0}
+h3{color:var(--b);margin:16px 0 6px}.mu{color:var(--mu)}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;background:var(--c)}
+th,td{border:1px solid var(--l);padding:6px;text-align:left;vertical-align:top}th{background:var(--b);color:#fff}
+.q{width:100%;margin:8px 0}textarea{width:100%;min-height:44px}
+.nn{width:62px;text-align:center}.bad{background:#d32f2f!important;color:#fff!important;font-weight:700}
+.bars{display:flex;align-items:flex-end;gap:6px;height:170px;overflow-x:auto;background:var(--c);border:1px solid var(--l);border-radius:10px;padding:8px}
+.bar{flex:1;min-width:38px;height:100%;display:flex;flex-direction:column;align-items:center;font-size:11px}
+.col{flex:1;width:100%;display:flex;align-items:flex-end;min-height:0}.col i{width:100%;background:var(--g);border-radius:4px 4px 0 0}.col i.bad{background:#d32f2f}
+.login{max-width:360px;margin:40px auto;padding:16px}.login input{width:100%;margin:6px 0}
+.bl{background:#fff;color:#111;border:2px solid #111;padding:12px;margin-top:10px}
+.bl table{background:#fff}.bl th{background:#1e40af;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bl td,.bl th{border:1px solid #111;color:#111}.bl th{color:#fff}
+.bh{display:flex;align-items:center;gap:10px;text-align:center;justify-content:center}.bh img{height:70px}.bh h2{margin:0;color:#1e40af}.bh p{margin:2px}
+.bl .c{text-align:center;width:11%}.bl .bad{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.bl .sb td{font-weight:700;background:#eaf3ec}.bl .ob td{font-size:12px;font-style:italic}
+.sg{display:flex;gap:16px;margin-top:40px;text-align:center;font-size:12px}.sg div{flex:1;border-top:1px solid #111;padding-top:4px}
+.onlyprint{display:none}
+@media print{.noprint,nav,.top{display:none!important}body{background:#fff}main{padding:0;max-width:none}.bl{border:0;margin:0;padding:0}.onlyprint{display:block;white-space:pre-wrap}tr{break-inside:avoid}@page{size:letter portrait;margin:12mm}}
+</style></head><body><div id="app"></div>
+<script>
+const $=s=>document.querySelector(s),K='pando_academica_v1';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let db=null,me=null,view='dash',ui={};
+try{db=JSON.parse(localStorage.getItem(K)||'null')}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(db))}catch(e){}};
+async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('pando|'+s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+const SUBJ=['Castellano','Matemáticas','Inglés','Educación Física','Ciencias Sociales','Ciencias Naturales','Educación Artística','Religión Bíblica','Ética y Valores','Disciplina','Responsabilidad'];
+const newdb=(u,p)=>({inst:{n:'IED LAS MONTAÑAS DEL PANDO',l:'EL PANDO NOS UNE',u:'Santa Marta, Magdalena',y:'2026',rector:'',docente:'',escudo:''},users:[{u,p,r:'admin'}],subj:SUBJ.slice(),st:[],gr:{},go:{},rec:[],per:1,rule:'max',min:2,maxg:10,ap:6});
+const NAV={dash:'Inicio',est:'Estudiantes',cal:'Calificaciones',bol:'Boletín',prom:'Promedios',rec:'Recuperaciones',cfg:'Configuración'};
+const ok=k=>me.r=='admin'||(me.r=='prof'&&k!='cfg')||(me.r=='est'&&['dash','bol','prom','rec'].includes(k));
+const myS=()=>me.r=='est'?db.st.filter(s=>s.id==me.sid):db.st;
+const G=(s,a,p)=>db.gr[s+'|'+a+'|'+p]||{};
+const N=(s,a,p)=>{const g=G(s,a,p);return g.n!=null&&(me.r!='est'||g.pub)?g.n:null};
+const E=(s,a,p)=>{let n=N(s,a,p);const r=db.rec.find(r=>r.s==s&&r.a==a&&r.p==p);if(n!=null&&r&&db.rule=='max')n=Math.max(n,r.n);return n};
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+const nn=x=>x!=null;
+const DEF=(s,a)=>avg([1,2,3,4].map(p=>E(s,a,p)).filter(nn));
+const PP=(s,p)=>avg(db.subj.map(a=>E(s,a,p)).filter(nn));
+const GEN=s=>avg(db.subj.map(a=>DEF(s,a)).filter(nn));
+const f=n=>n==null?'-':n.toFixed(1);
+const cl=n=>n!=null&&n<db.ap?' bad':'';
+const rank=(s,g)=>g==null?'-':db.st.filter(x=>x.curso==s.curso).map(x=>GEN(x.id)).filter(x=>x!=null&&x>g).length+1;
+const bars=a=>`<div class=bars>${a.map(([l,v])=>`<div class=bar><div class=col><i class="${cl(v).trim()}" style="height:${v==null?0:v*10}%"></i></div><b>${f(v)}</b><span>${esc(l)}</span></div>`).join('')}</div>`;
+const list=a=>a.length?'<ul>'+a.map(([s,g])=>`<li>${esc(s.nom)} — <b>${f(g)}</b></li>`).join('')+'</ul>':'<p class=mu>Sin datos aún</p>';
+const sel=(k,arr,cur,id)=>`<select ${id?`id=${id}`:`onchange="setU('${k}',this.value)"`}>${arr.map(x=>`<option value="${esc(x)}" ${String(x)==String(cur)?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
+const setU=(k,v)=>{ui[k]=v;shell()};
+const go=v=>{view=v;shell();scrollTo(0,0)};
+const out=()=>{me=null;render()};
+function setG(s,a,p,fl,v){const k=s+'|'+a+'|'+p,g=db.gr[k]=db.gr[k]||{};if(v==null||v==='')delete g[fl];else g[fl]=v;g.d=new Date().toISOString().slice(0,10);save()}
+function ch(e){const d=e.dataset;if(d.t=='n'){let v=e.value.trim().replace(',','.');if(v!==''){v=parseFloat(v);if(isNaN(v)||v<db.min||v>db.maxg){alert('La nota debe estar entre '+db.min+' y '+db.maxg);e.value='';return}}e.classList.toggle('bad',v!==''&&v<db.ap);setG(d.s,d.a,d.p,'n',v)}
+else if(d.t=='o')setG(d.s,d.a,d.p,'o',e.value);else if(d.t=='p')setG(d.s,d.a,d.p,'pub',e.checked||null);else if(d.t=='g'){db.go[d.s+'|'+d.p]=e.value;save()}}
+function pubAll(){db.st.filter(s=>s.curso==ui.cc).forEach(s=>{if(G(s.id,ui.aa,ui.pp).n!=null)setG(s.id,ui.aa,ui.pp,'pub',true)});shell()}
+async function addE(){const g=i=>$('#'+i).value.trim();if(!g('e_nom')||!g('e_cod'))return alert('Código y nombre son obligatorios');if(db.st.some(s=>s.cod==g('e_cod')))return alert('Código repetido');
+const id='s'+Date.now(),s={id,cod:g('e_cod'),nom:g('e_nom'),doc:g('e_doc'),grado:g('e_gra'),curso:g('e_cur'),estado:'Matriculado'};
+if(g('e_usr')){if(db.users.some(u=>u.u==g('e_usr')))return alert('Ese usuario ya existe');if(!$('#e_pw').value)return alert('Falta la contraseña');db.users.push({u:g('e_usr'),p:await sha($('#e_pw').value),r:'est',sid:id})}
+db.st.push(s);save();shell()}
+function editE(id){const s=db.st.find(x=>x.id==id);const n=prompt('Nombre',s.nom);if(n==null)return;s.nom=n||s.nom;s.grado=prompt('Grado',s.grado)??s.grado;s.curso=prompt('Curso',s.curso)??s.curso;s.estado=prompt('Estado de matrícula',s.estado)??s.estado;save();shell()}
+function delE(id){if(!confirm('¿Eliminar este estudiante y todas sus notas?'))return;db.st=db.st.filter(x=>x.id!=id);db.users=db.users.filter(u=>u.sid!=id);Object.keys(db.gr).filter(k=>k.startsWith(id+'|')).forEach(k=>delete db.gr[k]);Object.keys(db.go).filter(k=>k.startsWith(id+'|')).forEach(k=>delete db.go[k]);db.rec=db.rec.filter(r=>r.s!=id);save();shell()}
+function addR(){const r={s:$('#r_s').value,a:$('#r_a').value,p:$('#r_p').value,n:parseFloat($('#r_n').value.replace(',','.')),o:$('#r_o').value,d:new Date().toISOString().slice(0,10)};
+if(isNaN(r.n)||r.n<db.min||r.n>db.maxg)return alert('Nota inválida');db.rec=db.rec.filter(x=>!(x.s==r.s&&x.a==r.a&&x.p==r.p));db.rec.push(r);save();shell()}
+const setI=(k,v)=>{db.inst[k]=v;save();shell()};
+const setD=(k,v)=>{db[k]=isNaN(v)||v===''?v:+v;save();shell()};
+function shield(e){const fl=e.files[0];if(!fl)return;if(fl.size>400000)return alert('Imagen muy pesada (máx. 400 KB)');const r=new FileReader();r.onload=()=>setI('escudo',r.result);r.readAsDataURL(fl)}
+function addSub(){const v=$('#ns').value.trim();if(v&&!db.subj.includes(v)){db.subj.push(v);save();shell()}}
+function renSub(i){const v=prompt('Nuevo nombre',db.subj[i]);if(!v||v==db.subj[i])return;Object.keys(db.gr).forEach(k=>{const q=k.split('|');if(q[1]==db.subj[i]){q[1]=v;db.gr[q.join('|')]=db.gr[k];delete db.gr[k]}});db.rec.forEach(r=>{if(r.a==db.subj[i])r.a=v});db.subj[i]=v;save();shell()}
+function delSub(i){if(!confirm('¿Eliminar la asignatura y sus notas?'))return;const a=db.subj[i];Object.keys(db.gr).filter(k=>k.split('|')[1]==a).forEach(k=>delete db.gr[k]);db.rec=db.rec.filter(r=>r.a!=a);db.subj.splice(i,1);save();shell()}
+async function addU(){const u=$('#u_u').value.trim(),p=$('#u_p').value;if(!u||!p)return alert('Usuario y contraseña');if(db.users.some(x=>x.u==u))return alert('Ya existe');db.users.push({u,p:await sha(p),r:'prof'});save();shell()}
+async function pw(u){const v=prompt('Nueva contraseña para '+u);if(!v)return;db.users.find(x=>x.u==u).p=await sha(v);save();alert('Contraseña cambiada')}
+function delU(u){if(u==me.u||!confirm('¿Eliminar usuario '+u+'?'))return;db.users=db.users.filter(x=>x.u!=u);save();shell()}
+function imp(){try{const d=JSON.parse($('#imp').value);if(!d.users||!d.subj)throw 0;if(!confirm('Esto reemplaza todos los datos actuales. ¿Continuar?'))return;db=d;save();me=null;render()}catch(e){alert('Respaldo no válido')}}
+const V={
+dash(){const L=myS(),gs=L.map(s=>[s,GEN(s.id)]).filter(x=>x[1]!=null),pend=Object.values(db.gr).filter(g=>g.n!=null&&!g.pub).length;
+const c=(t,v)=>`<div class=card><small>${t}</small><b>${v}</b></div>`;
+const fort=L.filter(s=>db.subj.some(a=>{const d=DEF(s.id,a);return d!=null&&d<db.ap})).length;
+return `<div class=grid>${c('Estudiantes',L.length)}${c('Profesores',db.users.filter(u=>u.r=='prof').length)}${c('Cursos',new Set(L.map(s=>s.curso)).size)}${c('Materias',db.subj.length)}${c('Período actual',db.per)}${c('Año lectivo',esc(db.inst.y))}${c('Promedio general',f(avg(gs.map(x=>x[1]))))}${c('Aprobados',gs.filter(x=>x[1]>=db.ap).length)}${c('Con materias por fortalecer',fort)}${c('Notas por publicar',pend)}</div>
+<h3>Rendimiento por período</h3>${bars([1,2,3,4].map(p=>['P'+p,avg(L.map(s=>PP(s.id,p)).filter(nn))]))}
+<h3>Promedio por asignatura</h3>${bars(db.subj.map(a=>[a.slice(0,6),avg(L.map(s=>DEF(s.id,a)).filter(nn))]))}
+<h3>Mejor desempeño</h3>${list(gs.slice().sort((x,y)=>y[1]-x[1]).slice(0,5))}<h3>Necesitan acompañamiento</h3>${list(gs.filter(x=>x[1]<db.ap))}`},
+est(){const q=(ui.q||'').toLowerCase(),adm=me.r=='admin',L=db.st.filter(s=>(s.nom+s.curso+s.grado).toLowerCase().includes(q));
+return `${adm?`<div class=box><h3>Registrar estudiante</h3><div class=f><input id=e_cod placeholder="Código"><input id=e_nom placeholder="Nombre completo"><input id=e_doc placeholder="Documento (opcional)"><input id=e_gra placeholder="Grado"><input id=e_cur placeholder="Curso"><input id=e_usr placeholder="Usuario de acceso"><input id=e_pw type=password placeholder="Contraseña"></div><button class=pri onclick="addE()">Guardar</button></div>`:''}
+<input class=q placeholder="Buscar por nombre, grado o curso" value="${esc(ui.q||'')}" onchange="setU('q',this.value)">
+<div class=tw><table><tr><th>Código<th>Nombre<th>Grado<th>Curso<th>Estado${adm?'<th>':''}</tr>${L.map(s=>`<tr><td>${esc(s.cod)}<td>${esc(s.nom)}<td>${esc(s.grado)}<td>${esc(s.curso)}<td>${esc(s.estado)}${adm?`<td><button onclick="editE('${s.id}')">Editar</button> <button class=del onclick="delE('${s.id}')">X</button>`:''}</tr>`).join('')}</table></div>${L.length?'':'<p class=mu>Sin estudiantes registrados.</p>'}`},
+cal(){const cs=[...new Set(db.st.map(s=>s.curso))];if(!cs.length)return'<p class=mu>Primero registre estudiantes.</p>';
+const c=ui.cc||cs[0],a=ui.aa||db.subj[0],p=ui.pp||db.per;ui.cc=c;ui.aa=a;ui.pp=p;
+return `<div class=f>${sel('cc',cs,c)}${sel('aa',db.subj,a)}${sel('pp',[1,2,3,4],p)}</div><p class=mu>Escala ${db.min} a ${db.maxg}. Menos de ${db.ap} se resalta en rojo.</p>
+<div class=tw><table><tr><th>Estudiante<th>Nota<th>Observación<th>Pub.</tr>${db.st.filter(s=>s.curso==c).map(s=>{const g=G(s.id,a,p),at=`data-s="${s.id}" data-a="${esc(a)}" data-p="${p}" onchange="ch(this)"`;return `<tr><td>${esc(s.nom)}<td><input class="nn${cl(g.n)}" inputmode=decimal value="${g.n??''}" data-t=n ${at}><td><textarea data-t=o ${at}>${esc(g.o)}</textarea><td><input type=checkbox ${g.pub?'checked':''} data-t=p ${at}></tr>`}).join('')}</table></div><p><button class=pri onclick="pubAll()">Publicar todas las notas</button></p>`},
+bol(){const L=myS();if(!L.length)return'<p class=mu>Sin estudiantes.</p>';const s=L.find(x=>x.id==ui.bs)||L[0],p=ui.bp||db.per,I=db.inst,stf=me.r!='est';
+const vis=(a)=>{const g=G(s.id,a,p);return g.o&&(stf||g.pub)?g.o:''};
+const cell=n=>`<td class="c${cl(n)}">${f(n)}</td>`;
+const rows=db.subj.map(a=>`<tr class=sb><td>${esc(a)}${[1,2,3,4].map(q=>cell(E(s.id,a,q))).join('')}${cell(DEF(s.id,a))}</tr><tr class=ob><td colspan=6>OBSERVACIÓN DE ${esc(a.toUpperCase())} (P${p}): ${esc(vis(a))||'—'}</tr>`).join('');
+const ds=db.subj.map(a=>[a,DEF(s.id,a)]),ap=ds.filter(x=>x[1]!=null&&x[1]>=db.ap).length,na=ds.filter(x=>x[1]!=null&&x[1]<db.ap),falt=ds.filter(x=>x[1]==null),gen=GEN(s.id);
+const go=db.go[s.id+'|'+p]||'';
+return `<div class="f noprint">${stf?sel('bs',L.map(x=>x.id),s.id).replace(/<option value="([^"]+)"/g,(m,v)=>`<option value="${v}"`).replace(/>([^<]*)<\/option>/g,(m,v)=>{const x=L.find(y=>y.id==v);return `>${esc(x?x.nom:v)}</option>`}):''}${sel('bp',[1,2,3,4],p)}<button class=pri onclick="print()">Imprimir / Guardar PDF</button></div>
+<div class=bl><div class=bh>${I.escudo?`<img src="${I.escudo}">`:''}<div><h2>${esc(I.n)}</h2><p><b>${esc(I.l)}</b></p><p>${esc(I.u)} · AÑO LECTIVO ${esc(I.y)}</p><p><b>INFORME ACADÉMICO INDIVIDUAL</b></p></div></div>
+<table style="margin-top:8px"><tr><td colspan=2><b>Estudiante:</b> ${esc(s.nom)}<td><b>Código:</b> ${esc(s.cod)}<tr><td><b>Grado:</b> ${esc(s.grado)}<td><b>Curso:</b> ${esc(s.curso)}<td><b>Año lectivo:</b> ${esc(I.y)}<tr><td colspan=3><b>Período de observación general:</b> ${p}</tr></table>
+<table style="margin-top:8px"><tr><th>ASIGNATURA<th>P1<th>P2<th>P3<th>P4<th>DEFINITIVA</tr>${rows}</table>
+<table style="margin-top:8px"><tr><th colspan=4>PROMEDIOS</tr><tr><td>Período 1: ${f(PP(s.id,1))}<td>Período 2: ${f(PP(s.id,2))}<td>Período 3: ${f(PP(s.id,3))}<td>Período 4: ${f(PP(s.id,4))}
+<tr><td><b>Promedio general: ${f(gen)}</b><td>Aprobadas: ${ap}<td>No aprobadas: ${na.length}<td>Puesto: ${rank(s,gen)}
+<tr><td colspan=4>Requieren acompañamiento o recuperación: ${na.length?esc(na.map(x=>x[0]).join(', ')):'ninguna'}${falt.length?`<br><i>Faltan notas por registrar en: ${esc(falt.map(x=>x[0]).join(', '))}</i>`:''}</tr></table>
+<table style="margin-top:8px"><tr><th>OBSERVACIÓN GENERAL DEL ESTUDIANTE (P${p})</tr><tr><td>${stf?`<textarea class=noprint data-t=g data-s="${s.id}" data-p="${p}" onchange="ch(this)" placeholder="Fortalezas, desempeño, participación, responsabilidad, comportamiento, aspectos por fortalecer y recomendaciones">${esc(go)}</textarea><div class=onlyprint>${esc(go)}</div>`:esc(go)||'—'}</tr></table>
+<div class=sg><div>Firma del docente<br>${esc(I.docente)}</div><div>Firma de rectoría<br>${esc(I.rector)}</div><div>Firma del acudiente</div></div></div>
+<div class=noprint><h3>Gráficas del estudiante</h3>${bars([1,2,3,4].map(q=>['P'+q,PP(s.id,q)]))}<br>${bars(db.subj.map(a=>[a.slice(0,6),DEF(s.id,a)]))}</div>`},
+prom(){const cs=[...new Set(myS().map(s=>s.curso))];if(!cs.length)return'<p class=mu>Sin datos.</p>';const c=ui.pc||cs[0],L=myS().filter(s=>s.curso==c);
+const rows=L.map(s=>[s,GEN(s.id)]).sort((a,b)=>(b[1]??-1)-(a[1]??-1));
+return `<div class=f>${sel('pc',cs,c)}</div><div class=tw><table><tr><th>Puesto<th>Estudiante<th>P1<th>P2<th>P3<th>P4<th>General<th>Aprob.<th>No aprob.</tr>${rows.map(([s,g])=>{const d=db.subj.map(a=>DEF(s.id,a)).filter(nn);return `<tr><td>${rank(s,g)}<td>${esc(s.nom)}${[1,2,3,4].map(p=>`<td>${f(PP(s.id,p))}`).join('')}<td class="${cl(g).trim()}">${f(g)}<td>${d.filter(x=>x>=db.ap).length}<td>${d.filter(x=>x<db.ap).length}</tr>`}).join('')}</table></div>
+<h3>Promedio por asignatura</h3><div class=tw><table>${db.subj.map(a=>`<tr><td>${esc(a)}<td>${f(avg(L.map(s=>DEF(s.id,a)).filter(nn)))}</tr>`).join('')}</table></div>`},
+rec(){const L=myS(),stf=me.r!='est',por=L.flatMap(s=>db.subj.map(a=>[s,a,DEF(s.id,a)])).filter(x=>x[2]!=null&&x[2]<db.ap);
+const nm=id=>(db.st.find(s=>s.id==id)||{}).nom||'';
+return `${stf?`<div class=box><h3>Registrar recuperación</h3><div class=f><select id=r_s>${L.map(s=>`<option value="${s.id}">${esc(s.nom)}</option>`).join('')}</select>${sel('',db.subj,'','r_a')}${sel('',[1,2,3,4],db.per,'r_p')}<input id=r_n inputmode=decimal placeholder="Nota"><input id=r_o placeholder="Observación"></div><button class=pri onclick="addR()">Guardar</button><p class=mu>La nota original no se modifica. Regla actual: ${db.rule=='max'?'la definitiva usa la mayor entre original y recuperación':'la recuperación no cambia la definitiva'}.</p></div>`:''}
+<h3>Materias por recuperar</h3>${por.length?'<ul>'+por.map(([s,a,d])=>`<li>${esc(s.nom)} — ${esc(a)}: ${f(d)}</li>`).join('')+'</ul>':'<p class=mu>Ninguna</p>'}
+<h3>Resultados</h3><div class=tw><table><tr><th>Estudiante<th>Asignatura<th>P<th>Original<th>Recup.<th>Obs.</tr>${db.rec.filter(r=>L.some(s=>s.id==r.s)).map(r=>`<tr><td>${esc(nm(r.s))}<td>${esc(r.a)}<td>${r.p}<td>${f(N(r.s,r.a,r.p))}<td>${f(r.n)}<td>${esc(r.o)}</tr>`).join('')}</table></div>`},
+cfg(){const I=db.inst,fl=(k,l)=>`<label>${l}<input value="${esc(I[k])}" onchange="setI('${k}',this.value)"></label>`;
+return `<div class=box><h3>Identidad institucional</h3><div class=f style="flex-direction:column">${fl('n','Nombre')}${fl('l','Lema')}${fl('u','Ubicación')}${fl('y','Año lectivo')}${fl('rector','Nombre del rector (firma)')}${fl('docente','Nombre del docente (firma)')}<label>Escudo<input type=file accept="image/*" onchange="shield(this)"></label></div></div>
+<div class=box><h3>Académico</h3><div class=f><label>Período actual ${sel('',[1,2,3,4],db.per,'c_per').replace('<select','<select onchange="setD(\'per\',this.value)"')}</label><label>Recuperación<select onchange="setD('rule',this.value)"><option value=max ${db.rule=='max'?'selected':''}>Usar la mayor nota</option><option value=none ${db.rule=='none'?'selected':''}>No cambia la definitiva</option></select></label></div>
+<div class=f><label>Mín.<input type=number step=.1 value="${db.min}" onchange="setD('min',this.value)"></label><label>Máx.<input type=number step=.1 value="${db.maxg}" onchange="setD('maxg',this.value)"></label><label>Aprueba desde<input type=number step=.1 value="${db.ap}" onchange="setD('ap',this.value)"></label></div></div>
+<div class=box><h3>Asignaturas</h3>${db.subj.map((a,i)=>`<div class=f><span style="flex:1">${i+1}. ${esc(a)}</span><button onclick="renSub(${i})">Editar</button><button class=del onclick="delSub(${i})">X</button></div>`).join('')}<div class=f><input id=ns placeholder="Nueva asignatura"><button class=pri onclick="addSub()">Agregar</button></div></div>
+<div class=box><h3>Usuarios</h3>${db.users.map(u=>`<div class=f><span style="flex:1">${esc(u.u)} (${u.r})</span><button onclick="pw('${esc(u.u)}')">Contraseña</button><button class=del onclick="delU('${esc(u.u)}')">X</button></div>`).join('')}<div class=f><input id=u_u placeholder="Usuario profesor"><input id=u_p type=password placeholder="Contraseña"><button class=pri onclick="addU()">Crear profesor</button></div><p class=mu>Los estudiantes se crean en el módulo Estudiantes.</p></div>
+<div class=box><h3>Copia de respaldo</h3><p class=mu>Copie este texto y guárdelo en un lugar seguro (notas, correo, Drive).</p><textarea readonly onclick="this.select()" style="min-height:90px">${esc(JSON.stringify(db))}</textarea><p class=mu>Para restaurar, pegue un respaldo aquí:</p><textarea id=imp></textarea><button class=pri onclick="imp()">Restaurar</button></div>`}};
+function shell(){const nav=Object.entries(NAV).filter(([k])=>ok(k)).map(([k,v])=>`<button class="${k==view?'on':''}" onclick="go('${k}')">${v}</button>`).join('');
+$('#app').innerHTML=`<header class="top noprint">${db.inst.escudo?`<img src="${db.inst.escudo}">`:''}<div><b>${esc(db.inst.n)}</b><small>${esc(db.inst.l)} · ${esc(db.inst.u)} · ${esc(db.inst.y)}</small></div><button onclick="out()">Salir</button></header><nav>${nav}</nav><main>${V[view]()}</main>`}
+function render(){if(!db){$('#app').innerHTML=`<div class=login><h2>Configuración inicial</h2><p class=mu>Cree la cuenta del administrador institucional.</p><input id=su placeholder="Usuario"><input id=sp type=password placeholder="Contraseña (mín. 6)"><button class=pri onclick="setup()">Crear</button></div>`;return}
+if(!me){$('#app').innerHTML=`<div class=login><h2>${esc(db.inst.n)}</h2><p class=mu>${esc(db.inst.l)}</p><input id=lu placeholder="Usuario" autocapitalize=off><input id=lp type=password placeholder="Contraseña"><button class=pri onclick="login()">Ingresar</button></div>`;return}
+view='dash';ui={};shell()}
+async function setup(){const u=$('#su').value.trim(),p=$('#sp').value;if(!u||p.length<6)return alert('Usuario y contraseña de al menos 6 caracteres');db=newdb(u,await sha(p));save();me=db.users[0];render()}
+async function login(){const u=db.users.find(x=>x.u==$('#lu').value.trim());if(u&&u.p==await sha($('#lp').value)){me=u;render()}else alert('Usuario o contraseña incorrectos')}
+const ADM={u:'omar_palacin',p:'eb62d132034ef4c75a875841f11cbf3c1bc2c13700420469553ada7263dea32c',r:'admin'};
+if(!db){db=newdb(ADM.u,ADM.p);save()}else if(!db.users.some(x=>x.u==ADM.u)){db.users.push(ADM);save()}
+render();
+</script></body></html>
